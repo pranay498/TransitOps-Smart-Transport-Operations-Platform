@@ -29,6 +29,7 @@ prisma/dev.db-journal
 
 # Coverage
 coverage/
+.agents/
 
 # OS files
 .DS_Store

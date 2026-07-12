@@ -8,5 +8,6 @@ router.get('/', auth, requireRoles(['FLEET_MANAGER', 'SAFETY_OFFICER', 'FINANCIA
 router.post('/', auth, requireRoles(['FLEET_MANAGER']), vehiclesController.create);
 router.put('/:id', auth, requireRoles(['FLEET_MANAGER']), vehiclesController.update);
 router.delete('/:id', auth, requireRoles(['FLEET_MANAGER']), vehiclesController.delete);
+router.get('/:id/operational-cost', auth, requireRoles(['FLEET_MANAGER', 'FINANCIAL_ANALYST']), vehiclesController.getOperationalCost);
 
 module.exports = router;

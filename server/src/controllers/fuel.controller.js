@@ -3,7 +3,14 @@ const { handlePrismaError, parseNumber, parseDate, sendValidationError } = requi
 
 exports.getAll = async (req, res) => {
   try {
+    const { vehicleId } = req.query;
+    const where = {};
+    if (vehicleId) {
+      where.vehicleId = vehicleId;
+    }
+
     const fuelLogs = await prisma.fuelLog.findMany({
+      where,
       include: { vehicle: true },
       orderBy: { date: 'desc' },
     });
