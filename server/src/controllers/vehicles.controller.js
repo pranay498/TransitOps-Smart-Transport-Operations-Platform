@@ -104,6 +104,30 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Check for linked records before attempting delete
+    const [tripCount, fuelLogCount, maintenanceCount] = await Promise.all([
+      prisma.trip.count({ where: { vehicleId: id } }),
+      prisma.fuelLog.count({ where: { vehicleId: id } }),
+      prisma.maintenanceLog.count({ where: { vehicleId: id } }),
+    ]);
+
+    if (tripCount > 0) {
+      return res.status(409).json({
+        error: `Cannot delete vehicle — it has ${tripCount} trip(s) linked to it. Delete the trips first, or retire the vehicle instead.`,
+      });
+    }
+    if (fuelLogCount > 0) {
+      return res.status(409).json({
+        error: `Cannot delete vehicle — it has ${fuelLogCount} fuel log(s) linked to it. Remove the fuel logs first.`,
+      });
+    }
+    if (maintenanceCount > 0) {
+      return res.status(409).json({
+        error: `Cannot delete vehicle — it has ${maintenanceCount} maintenance log(s) linked to it. Remove them first.`,
+      });
+    }
+
     await prisma.vehicle.delete({ where: { id } });
     return res.status(204).send();
   } catch (error) {
