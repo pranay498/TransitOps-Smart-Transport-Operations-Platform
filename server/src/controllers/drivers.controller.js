@@ -1,13 +1,25 @@
 const prisma = require('../lib/prisma');
 const { handlePrismaError, parseDate, parseNumber, sendValidationError } = require('../utils/controllerHelpers');
+const { setDriverStatus } = require('../services/statusService');
 
 exports.getAll = async (req, res) => {
   try {
+    const { status } = req.query;
+    const where = {};
+    if (status) where.status = status;
+
     const drivers = await prisma.driver.findMany({
+      where,
       orderBy: { name: 'asc' },
     });
 
-    return res.json({ drivers });
+    const now = new Date();
+    const driversWithExpiry = drivers.map((driver) => ({
+      ...driver,
+      licenseExpired: new Date(driver.licenseExpiry) < now,
+    }));
+
+    return res.json({ drivers: driversWithExpiry });
   } catch (error) {
     return handlePrismaError(res, error);
   }
@@ -29,16 +41,18 @@ exports.create = async (req, res) => {
         licenseExpiry: parseDate(licenseExpiry, 'licenseExpiry'),
         contactNumber,
         safetyScore: safetyScore === undefined ? 100 : parseNumber(safetyScore, 'safetyScore'),
-        status,
+        status: status || 'AVAILABLE',
       },
     });
 
     return res.status(201).json({ driver });
   } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'A driver with this license number already exists.' });
+    }
     if (error.statusCode) {
       return sendValidationError(res, error);
     }
-
     return handlePrismaError(res, error, 'Driver not found.');
   }
 };
@@ -46,27 +60,47 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
+    const { status, ...otherData } = req.body;
+
+    const driver = await prisma.driver.findUnique({ where: { id } });
+    if (!driver) {
+      return res.status(404).json({ error: 'Driver not found.' });
+    }
+
+    if (status !== undefined) {
+      try {
+        await setDriverStatus(id, status);
+      } catch (err) {
+        return res.status(400).json({ error: err.message });
+      }
+    }
+
     const data = {};
+    if (otherData.name !== undefined) data.name = otherData.name;
+    if (otherData.licenseNumber !== undefined) data.licenseNumber = otherData.licenseNumber;
+    if (otherData.licenseCategory !== undefined) data.licenseCategory = otherData.licenseCategory;
+    if (otherData.licenseExpiry !== undefined) data.licenseExpiry = parseDate(otherData.licenseExpiry, 'licenseExpiry');
+    if (otherData.contactNumber !== undefined) data.contactNumber = otherData.contactNumber;
+    if (otherData.safetyScore !== undefined) data.safetyScore = parseNumber(otherData.safetyScore, 'safetyScore');
 
-    if (req.body.name !== undefined) data.name = req.body.name;
-    if (req.body.licenseNumber !== undefined) data.licenseNumber = req.body.licenseNumber;
-    if (req.body.licenseCategory !== undefined) data.licenseCategory = req.body.licenseCategory;
-    if (req.body.licenseExpiry !== undefined) data.licenseExpiry = parseDate(req.body.licenseExpiry, 'licenseExpiry');
-    if (req.body.contactNumber !== undefined) data.contactNumber = req.body.contactNumber;
-    if (req.body.safetyScore !== undefined) data.safetyScore = parseNumber(req.body.safetyScore, 'safetyScore');
-    if (req.body.status !== undefined) data.status = req.body.status;
+    let updatedDriver = driver;
+    if (Object.keys(data).length > 0) {
+      updatedDriver = await prisma.driver.update({
+        where: { id },
+        data,
+      });
+    } else if (status !== undefined) {
+      updatedDriver = await prisma.driver.findUnique({ where: { id } });
+    }
 
-    const driver = await prisma.driver.update({
-      where: { id },
-      data,
-    });
-
-    return res.json({ driver });
+    return res.json({ driver: updatedDriver });
   } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'A driver with this license number already exists.' });
+    }
     if (error.statusCode) {
       return sendValidationError(res, error);
     }
-
     return handlePrismaError(res, error, 'Driver not found.');
   }
 };
@@ -74,7 +108,6 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   try {
     const { id } = req.params;
-
     await prisma.driver.delete({ where: { id } });
     return res.status(204).send();
   } catch (error) {

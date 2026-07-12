@@ -19,6 +19,7 @@
 
 ### Backend Scaffold & Services
 - [ ] **BACK-01**: `statusService.js` with `setVehicleStatus()` and `setDriverStatus()` mutating functions as the only mutators allowed.
+  - ⚠️ `statusService.js` exists but `trips.controller.js` (dispatch, complete, cancel) and `vehicles.controller.js` (status update) still bypass it and use direct Prisma calls.
 - [x] **BACK-02**: Empty Express route/controller files for all 8 modules returning `{ mock: true }` were replaced with real Prisma-backed handlers.
 
 ### Frontend Scaffold & Navigation
@@ -26,8 +27,14 @@
 - [x] **FRONT-02**: AuthContext providing user role/token state and ProtectedRoute wrapper.
 - [x] **FRONT-03**: Shared layout with sidebar navigation.
 
-### Documentation
-- [x] **DOCS-01**: Root README.md documenting how to run development servers and database setup.
+### Frontend CRUD UX
+- [ ] **CRUD-01**: Create/Edit/Delete modals or forms for Vehicles, Drivers, Trips, Maintenance.
+- [ ] **CRUD-02**: Create/Edit forms for Fuel Logs and Expenses (currently stub buttons with no modals).
+
+### Integration & Startup
+- [ ] **INT-01**: Integration tests covering login flow, RBAC role guards, and dispatch→complete trip workflow.
+- [ ] **INT-02**: Both dev servers (client :5173, server :7002) start cleanly with documented setup steps.
+
 
 ## Traceability
 
@@ -39,18 +46,22 @@
 | DB-02 | Phase 1 | Complete |
 | AUTH-01 | Phase 1 | Complete |
 | AUTH-02 | Phase 1 | Complete |
-| BACK-01 | Phase 1 | Partial |
+| BACK-01 | Phase 1 | ⚠️ Partial — statusService bypassed in trips/vehicles controllers |
 | BACK-02 | Phase 1 | Complete |
 | FRONT-01 | Phase 1 | Complete |
 | FRONT-02 | Phase 1 | Complete |
 | FRONT-03 | Phase 1 | Complete |
 | DOCS-01 | Phase 1 | Complete |
+| CRUD-01 | Phase 2 | Not Started |
+| CRUD-02 | Phase 2 | Not Started |
+| INT-01 | Phase 2 | Not Started |
+| INT-02 | Phase 2 | Not Started |
 
 **Coverage:**
-- v1 requirements: 12 total
-- Mapped to phases: 12
+- v1 requirements: 16 total (12 original + 4 new)
+- Mapped to phases: 16
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-12*
-*Last updated: 2026-07-12 after implementation update*
+*Last updated: 2026-07-12 — Audit: BACK-01 partial + CRUD/INT requirements added*

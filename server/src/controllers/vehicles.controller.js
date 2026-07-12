@@ -1,9 +1,16 @@
 const prisma = require('../lib/prisma');
 const { handlePrismaError, parseNumber, sendValidationError } = require('../utils/controllerHelpers');
+const { setVehicleStatus } = require('../services/statusService');
 
 exports.getAll = async (req, res) => {
   try {
+    const { type, status } = req.query;
+    const where = {};
+    if (type) where.type = type;
+    if (status) where.status = status;
+
     const vehicles = await prisma.vehicle.findMany({
+      where,
       orderBy: { regNumber: 'asc' },
     });
 
@@ -29,16 +36,18 @@ exports.create = async (req, res) => {
         acquisitionCost: parseNumber(acquisitionCost, 'acquisitionCost'),
         maxLoadKg: parseNumber(maxLoadKg, 'maxLoadKg'),
         odometer: parseNumber(odometer, 'odometer') ?? 0,
-        status,
+        status: status || 'AVAILABLE',
       },
     });
 
     return res.status(201).json({ vehicle });
   } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'A vehicle with this registration number already exists.' });
+    }
     if (error.statusCode) {
       return sendValidationError(res, error);
     }
-
     return handlePrismaError(res, error, 'Vehicle not found.');
   }
 };
@@ -46,27 +55,48 @@ exports.create = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
+    const { status, ...otherData } = req.body;
+
+    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Vehicle not found.' });
+    }
+
+    // Validate and update status via statusService if status is provided
+    if (status !== undefined) {
+      try {
+        await setVehicleStatus(id, status);
+      } catch (err) {
+        return res.status(400).json({ error: err.message });
+      }
+    }
+
     const data = {};
+    if (otherData.regNumber !== undefined) data.regNumber = otherData.regNumber;
+    if (otherData.name !== undefined) data.name = otherData.name;
+    if (otherData.type !== undefined) data.type = otherData.type;
+    if (otherData.maxLoadKg !== undefined) data.maxLoadKg = parseNumber(otherData.maxLoadKg, 'maxLoadKg');
+    if (otherData.odometer !== undefined) data.odometer = parseNumber(otherData.odometer, 'odometer');
+    if (otherData.acquisitionCost !== undefined) data.acquisitionCost = parseNumber(otherData.acquisitionCost, 'acquisitionCost');
 
-    if (req.body.regNumber !== undefined) data.regNumber = req.body.regNumber;
-    if (req.body.name !== undefined) data.name = req.body.name;
-    if (req.body.type !== undefined) data.type = req.body.type;
-    if (req.body.status !== undefined) data.status = req.body.status;
-    if (req.body.maxLoadKg !== undefined) data.maxLoadKg = parseNumber(req.body.maxLoadKg, 'maxLoadKg');
-    if (req.body.odometer !== undefined) data.odometer = parseNumber(req.body.odometer, 'odometer');
-    if (req.body.acquisitionCost !== undefined) data.acquisitionCost = parseNumber(req.body.acquisitionCost, 'acquisitionCost');
+    let updatedVehicle = vehicle;
+    if (Object.keys(data).length > 0) {
+      updatedVehicle = await prisma.vehicle.update({
+        where: { id },
+        data,
+      });
+    } else if (status !== undefined) {
+      updatedVehicle = await prisma.vehicle.findUnique({ where: { id } });
+    }
 
-    const vehicle = await prisma.vehicle.update({
-      where: { id },
-      data,
-    });
-
-    return res.json({ vehicle });
+    return res.json({ vehicle: updatedVehicle });
   } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'A vehicle with this registration number already exists.' });
+    }
     if (error.statusCode) {
       return sendValidationError(res, error);
     }
-
     return handlePrismaError(res, error, 'Vehicle not found.');
   }
 };
@@ -74,7 +104,6 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   try {
     const { id } = req.params;
-
     await prisma.vehicle.delete({ where: { id } });
     return res.status(204).send();
   } catch (error) {

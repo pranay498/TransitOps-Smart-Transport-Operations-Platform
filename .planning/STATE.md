@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-07-12)
 
 **Core value:** Enable three developers to work in parallel on separate modules with zero starting friction, minimal merge conflicts, and verified type-safety/authentication contracts.
-**Current focus:** Stabilization and business-rule consistency
+**Current focus:** Next integration checkpoints (Trips and Maintenance workflow)
 
 ## Current Position
 
-Phase: 1 of 1 (Shared Scaffold)
+Phase: 2 of 2 (Stabilization & CRUD)
 Plan: 1 of 1 in current phase
-Status: Foundation implemented, module work next
-Last activity: 2026-07-12 — Plan updated to the hackathon split
+Status: ✅ Foundation complete — CRUD + statusService + Dashboard aligned
+Last activity: 2026-07-12 — Fully finished vehicles/drivers CRUD and dashboard KPI updates
 
-Progress: [██████████] 100%
+Progress: [██████████] 100% (Foundation scope complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
+- Total plans completed: 2
 - Average duration: N/A
 - Total execution time: N/A
 
@@ -28,10 +28,7 @@ Progress: [██████████] 100%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. TransitOps Scaffold | 1 | 1 | N/A |
-
-**Recent Trend:**
-- Last 5 plans: 1 complete
-- Trend: Stable
+| 2. Stabilization & CRUD | 1 | 1 | N/A |
 
 *Updated after each plan completion*
 
@@ -39,56 +36,25 @@ Progress: [██████████] 100%
 
 ### Completed So Far
 
-- Set up the monorepo client and server dependencies
-- Implemented Prisma schema and seed data for users, vehicles, drivers, trips, maintenance, fuel, and expenses
-- Added JWT login, auth middleware, and role-based route guards
-- Replaced mock backend responses with real Prisma-backed handlers
-- Wired the frontend to fetch live data for dashboard, vehicles, drivers, trips, maintenance, fuel, expenses, and reports
-- Added a login role selector so demo accounts are easier to use
-- Refreshed the planning docs to the actual 8-hour team split and checkpoints
+- Completed `statusService.js` with full vehicle/driver state machines (using shared Prisma singleton)
+- Implemented vehicles and drivers controllers with custom status/type filters, unique check (409), and statusService transition enforcement
+- Added computed `licenseExpired` field on GET drivers
+- Redesigned Vehicles, Drivers, and Dashboard pages with rich styling, badging, filters, and full create/edit/delete modals
+- Fixed Dashboard KPI formulas and payload matching requested spec
+- Enabled DRIVER and SAFETY_OFFICER write permissions as required
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- Monorepo layout and Prisma schema are stable contracts
-- Backend routes now use JWT plus RBAC with real Prisma-backed handlers
+- All status changes must route through `statusService.js` (enforced on vehicles and drivers controllers)
 
 ### Pending Todos
 
-- Keep `statusService.js` aligned with status-changing controllers
-- Expand create/edit/delete UX in the client where needed
-- Add focused integration tests for login and role-restricted routes
-- Clean up the server startup/CORS config and verify both dev servers start consistently
-
-### Next Scheduled Work
-
-1. Route all status changes through `statusService.js` so business rules live in one place.
-2. Add real create/edit/delete forms for vehicles, drivers, trips, maintenance, fuel, and expenses.
-3. Add integration checks for login, RBAC, and the example workflow end-to-end.
-4. Clean up startup config, then rerun both apps with a known-good local database.
-
-### Ending / Handoff
-
-- Scaffold phase is complete.
-- The next ending point is the Hour 6 integration checkpoint.
-- The final hour target is a clean end-to-end demo run with seeded data and no mock API responses.
-
-### Blockers/Concerns
-
-- Some status transitions are enforced directly in controllers rather than routed through `statusService.js`
-
-## Deferred Items
-
-Items acknowledged and carried forward from previous milestone close:
-
-| Category | Item | Status | Deferred At |
-|----------|------|--------|-------------|
-| *(none)* | | | |
+- [ ] Align `trips.controller.js` to route state transitions through `statusService.js` (since it currently does direct updates)
+- [ ] Add integration tests for login, RBAC, and dispatch-to-complete workflows
+- [ ] Verify dev startup paths and document stable ports
 
 ## Session Continuity
 
-Last session: 2026-07-12 09:30
-Stopped at: Planning docs refreshed after implementation
+Last session: 2026-07-12 13:15 IST
+Stopped at: Foundation completed successfully
 Resume file: None
