@@ -108,6 +108,14 @@ exports.update = async (req, res) => {
 exports.delete = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const tripCount = await prisma.trip.count({ where: { driverId: id } });
+    if (tripCount > 0) {
+      return res.status(409).json({
+        error: `Cannot delete driver — they have ${tripCount} trip(s) linked to them. Delete the trips first, or set the driver to OFF_DUTY/SUSPENDED instead.`,
+      });
+    }
+
     await prisma.driver.delete({ where: { id } });
     return res.status(204).send();
   } catch (error) {
