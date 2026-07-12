@@ -20,20 +20,21 @@ async function buildCostSummary() {
   };
 }
 
-
-
-
 exports.getFuelEfficiency = async (req, res) => {
   try {
     const vehicles = await prisma.vehicle.findMany({
       include: {
         fuelLogs: { select: { liters: true } },
+        trips: {
+          where: { status: 'COMPLETED' },
+          select: { plannedDistKm: true },
+        },
       },
     });
 
     const data = vehicles.map((v) => {
-      // vehicle.odometer is the authoritative total distance (updated on every trip completion)
-      const totalDistanceKm = Number(v.odometer || 0);
+      const completedTrips = v.trips || [];
+      const totalDistanceKm = completedTrips.reduce((sum, trip) => sum + Number(trip.plannedDistKm || 0), 0);
       const totalFuelLiters = v.fuelLogs.reduce((sum, log) => sum + Number(log.liters || 0), 0);
       const kilometersPerLiter = totalFuelLiters === 0 ? 0 : totalDistanceKm / totalFuelLiters;
 
@@ -182,19 +183,22 @@ exports.getRoi = async (req, res) => {
         include: {
           fuelLogs: { select: { cost: true } },
           maintenanceLogs: { select: { cost: true } },
+          trips: {
+            where: { status: 'COMPLETED' },
+            select: { plannedDistKm: true },
+          },
         },
       }),
     ]);
 
     const estimatedRevenuePerKm = Number(process.env.REVENUE_PER_KM || 12);
 
-    // Use vehicle.odometer as the authoritative total distance
-    let totalFleetDistanceKm = vehicles.reduce((sum, v) => sum + Number(v.odometer || 0), 0);
-    const estimatedRevenue = totalFleetDistanceKm * estimatedRevenuePerKm;
-    const roiPercent = summary.totalCost === 0 ? 0 : ((estimatedRevenue - summary.totalCost) / summary.totalCost) * 100;
-
+    let totalFleetDistanceKm = 0;
     const data = vehicles.map((v) => {
-      const vehicleDistanceKm = Number(v.odometer || 0);
+      const completedTrips = v.trips || [];
+      const vehicleDistanceKm = completedTrips.reduce((sum, trip) => sum + Number(trip.plannedDistKm || 0), 0);
+      totalFleetDistanceKm += vehicleDistanceKm;
+
       const revenue = vehicleDistanceKm * estimatedRevenuePerKm;
       const fuelCost = v.fuelLogs.reduce((sum, f) => sum + Number(f.cost || 0), 0);
       const maintenanceCost = v.maintenanceLogs.reduce((sum, m) => sum + Number(m.cost || 0), 0);
@@ -213,6 +217,9 @@ exports.getRoi = async (req, res) => {
         roiPercent: Number(vehicleRoi.toFixed(2)),
       };
     });
+
+    const estimatedRevenue = totalFleetDistanceKm * estimatedRevenuePerKm;
+    const roiPercent = summary.totalCost === 0 ? 0 : ((estimatedRevenue - summary.totalCost) / summary.totalCost) * 100;
 
     return res.json({
       roi: {
@@ -238,12 +245,21 @@ exports.exportCsv = async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="transitops-${report || 'summary'}-report.csv"`);
 
     if (report === 'fuel-efficiency') {
-      const vehicles = await prisma.vehicle.findMany({ include: { fuelLogs: { select: { liters: true } } } });
+      const vehicles = await prisma.vehicle.findMany({
+        include: {
+          fuelLogs: { select: { liters: true } },
+          trips: {
+            where: { status: 'COMPLETED' },
+            select: { plannedDistKm: true },
+          },
+        },
+      });
       const rows = [
         asCsvRow(['Vehicle ID', 'Registration Number', 'Name', 'Actual Distance (km)', 'Total Fuel (Liters)', 'Fuel Efficiency (km/L)'])
       ];
       for (const v of vehicles) {
-        const totalDistance = Number(v.odometer || 0);
+        const completedTrips = v.trips || [];
+        const totalDistance = completedTrips.reduce((sum, trip) => sum + Number(trip.plannedDistKm || 0), 0);
         const totalFuel = v.fuelLogs.reduce((sum, f) => sum + (f.liters || 0), 0);
         const efficiency = totalFuel === 0 ? 0 : totalDistance / totalFuel;
         rows.push(asCsvRow([v.id, v.regNumber, v.name, totalDistance.toFixed(2), totalFuel.toFixed(2), efficiency.toFixed(2)]));
@@ -302,7 +318,11 @@ exports.exportCsv = async (req, res) => {
       const vehicles = await prisma.vehicle.findMany({
         include: {
           fuelLogs: { select: { cost: true } },
-          maintenanceLogs: { select: { cost: true } }
+          maintenanceLogs: { select: { cost: true } },
+          trips: {
+            where: { status: 'COMPLETED' },
+            select: { plannedDistKm: true },
+          },
         }
       });
       const estimatedRevenuePerKm = Number(process.env.REVENUE_PER_KM || 12);
@@ -310,7 +330,8 @@ exports.exportCsv = async (req, res) => {
         asCsvRow(['Vehicle ID', 'Registration Number', 'Name', 'Acquisition Cost (₹)', 'Actual Distance (km)', 'Est. Revenue (₹)', 'Fuel Cost (₹)', 'Maintenance Cost (₹)', 'ROI (%)'])
       ];
       for (const v of vehicles) {
-        const vehicleDistanceKm = Number(v.odometer || 0);
+        const completedTrips = v.trips || [];
+        const vehicleDistanceKm = completedTrips.reduce((sum, trip) => sum + Number(trip.plannedDistKm || 0), 0);
         const revenue = vehicleDistanceKm * estimatedRevenuePerKm;
         const fuelCost = v.fuelLogs.reduce((sum, f) => sum + Number(f.cost || 0), 0);
         const maintenanceCost = v.maintenanceLogs.reduce((sum, m) => sum + Number(m.cost || 0), 0);
