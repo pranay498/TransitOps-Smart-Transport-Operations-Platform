@@ -1,0 +1,116 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  FLEET_MANAGER
+  DRIVER
+  SAFETY_OFFICER
+  FINANCIAL_ANALYST
+}
+
+model Vehicle {
+  id              String           @id @default(uuid())
+  regNumber       String           @unique
+  name            String
+  type            String
+  maxLoadKg       Float
+  odometer        Float            @default(0)
+  acquisitionCost Float
+  status          VehicleStatus    @default(AVAILABLE)
+  trips           Trip[]
+  maintenanceLogs MaintenanceLog[]
+  fuelLogs        FuelLog[]
+  expenses        Expense[]
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  ON_TRIP
+  IN_SHOP
+  RETIRED
+}
+
+model Driver {
+  id              String       @id @default(uuid())
+  name            String
+  licenseNumber   String       @unique
+  licenseCategory String
+  licenseExpiry   DateTime
+  contactNumber   String
+  safetyScore     Float        @default(100)
+  status          DriverStatus @default(AVAILABLE)
+  trips           Trip[]
+}
+
+enum DriverStatus {
+  AVAILABLE
+  ON_TRIP
+  OFF_DUTY
+  SUSPENDED
+}
+
+model Trip {
+  id            String     @id @default(uuid())
+  source        String
+  destination   String
+  cargoWeightKg Float
+  plannedDistKm Float
+  finalOdometer Float?
+  fuelConsumedL Float?
+  status        TripStatus @default(DRAFT)
+  vehicleId     String
+  vehicle       Vehicle    @relation(fields: [vehicleId], references: [id])
+  driverId      String
+  driver        Driver     @relation(fields: [driverId], references: [id])
+  createdAt     DateTime   @default(now())
+}
+
+enum TripStatus {
+  DRAFT
+  DISPATCHED
+  COMPLETED
+  CANCELLED
+}
+
+model MaintenanceLog {
+  id        String    @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle   @relation(fields: [vehicleId], references: [id])
+  type      String
+  cost      Float
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  closedAt  DateTime?
+}
+
+model FuelLog {
+  id        String   @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  liters    Float
+  cost      Float
+  date      DateTime @default(now())
+}
+
+model Expense {
+  id        String   @id @default(uuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+  category  String
+  amount    Float
+  date      DateTime @default(now())
+}
