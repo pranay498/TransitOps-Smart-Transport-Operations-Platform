@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Shield, Sparkles } from 'lucide-react';
 
 const ROLE_EMAILS = {
   FLEET_MANAGER: 'fleetmanager@transitops.com',
@@ -45,71 +46,112 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0b0f19]">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-violet-400 mb-2">⚡ TransitOps</h1>
-          <p className="text-gray-400">Fleet Management Platform</p>
+    <div className="min-h-screen flex items-center justify-center bg-surface-background p-4 relative overflow-hidden">
+      {/* Background blobs for premium depth */}
+      <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] rounded-full bg-accent/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none" />
+
+      <div className="w-full max-w-md z-10 space-y-6">
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-accent/20 bg-accent/10 text-accent text-xs font-bold mb-4">
+            <Sparkles size={12} />
+            Enterprise Edition
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-accent to-indigo-400 bg-clip-text text-transparent">
+            TransitOps
+          </h1>
+          <p className="text-text-muted mt-2 text-sm font-medium">Smart Fleet & Transport Operations Platform</p>
         </div>
-        <div className="bg-[#111827] border border-gray-800 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-xl font-semibold text-gray-100 mb-6">Sign In</h2>
-          {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-900/20 border border-red-500/30 text-red-400 text-sm">
-              {error}
+
+        <div className="card shadow-glow overflow-hidden">
+          <div className="p-8 space-y-6">
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold text-text-primary">Welcome back</h2>
+              <p className="text-xs text-text-muted">Sign in to manage your transport assets</p>
             </div>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1.5">Role</label>
-              <select
-                value={role}
-                onChange={(e) => handleRoleChange(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#1f2937] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
+
+            {error && (
+              <div className="p-3 rounded-xl bg-red-950/20 border border-red-500/20 text-red-400 text-xs font-medium">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="label">Access Role</label>
+                <select
+                  value={role}
+                  onChange={(e) => handleRoleChange(e.target.value)}
+                  className="px-3 py-2 bg-surface-overlay border border-border-subtle rounded-lg text-sm text-text-primary outline-none focus:border-accent cursor-pointer"
+                >
+                  {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="label">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={ROLE_EMAILS[role]}
+                  required
+                  className="input text-sm"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="label">Password</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="input text-sm"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full btn-primary py-2.5 font-bold flex items-center justify-center gap-2 mt-2"
               >
-                {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
+                <Shield size={16} />
+                {loading ? 'Authenticating...' : 'Sign In'}
+              </button>
+            </form>
+
+            <div className="border-t border-border-subtle pt-4 space-y-2">
+              <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider block">
+                Demo Accounts
+              </span>
+              <div className="grid grid-cols-2 gap-2 text-[10px] text-text-secondary">
+                <div>
+                  <span className="font-bold text-text-primary block">Fleet Manager</span>
+                  fleetmanager@transitops.com
+                </div>
+                <div>
+                  <span className="font-bold text-text-primary block">Driver</span>
+                  driver@transitops.com
+                </div>
+                <div>
+                  <span className="font-bold text-text-primary block">Safety Officer</span>
+                  safetyofficer@transitops.com
+                </div>
+                <div>
+                  <span className="font-bold text-text-primary block">Financial Analyst</span>
+                  financialanalyst@transitops.com
+                </div>
+              </div>
+              <span className="text-[10px] text-text-muted block mt-1">
+                Password for all accounts: <span className="font-bold text-text-secondary">password123</span>
+              </span>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1.5">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={ROLE_EMAILS[role]}
-                required
-                className="w-full px-4 py-2.5 bg-[#1f2937] border border-gray-700 rounded-lg text-gray-100 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1.5">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="password123"
-                required
-                className="w-full px-4 py-2.5 bg-[#1f2937] border border-gray-700 rounded-lg text-gray-100 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-2.5 px-4 bg-violet-600 hover:bg-violet-700 disabled:bg-violet-800 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors text-sm"
-            >
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-          <div className="mt-6 p-3 bg-gray-800/50 rounded-lg text-xs text-gray-500">
-            <p className="font-medium text-gray-400 mb-1">Demo accounts:</p>
-            <p>Fleet Manager: fleetmanager@transitops.com</p>
-            <p>Driver: driver@transitops.com</p>
-            <p>Safety Officer: safetyofficer@transitops.com</p>
-            <p>Financial Analyst: financialanalyst@transitops.com</p>
-            <p className="mt-1 text-gray-600">Password: password123</p>
           </div>
         </div>
       </div>
