@@ -132,12 +132,14 @@ const ReportsPage = () => {
           {activeTab === 'fuel-efficiency' && reports.fuelEfficiency && (
             <div className="grid grid-cols-1 gap-6">
               {/* Fleet Summary Card */}
-              <div className="card max-w-md shadow-glow-sm">
-                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Fleet Average Efficiency</h3>
-                <p className="text-3xl font-extrabold text-accent">
-                  {reports.fuelEfficiency.fleetAverage?.kilometersPerLiter || 0} <span className="text-sm font-medium text-text-muted">km/L</span>
-                </p>
-                <p className="text-xs text-text-muted mt-2 border-t border-border-subtle pt-2">
+              <div className="card max-w-md p-6 shadow-glow-sm border-l-4 border-l-accent transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow flex flex-col justify-between">
+                <div>
+                  <h3 className="label mb-2">Fleet Average Efficiency</h3>
+                  <p className="text-3xl font-extrabold text-accent">
+                    {reports.fuelEfficiency.fleetAverage?.kilometersPerLiter || 0} <span className="text-sm font-medium text-text-muted font-normal lowercase">km/L</span>
+                  </p>
+                </div>
+                <p className="text-xs text-text-muted mt-4 border-t border-border-subtle pt-3">
                   Based on {reports.fuelEfficiency.fleetAverage?.totalDistanceKm?.toLocaleString() || 0} km completed and{' '}
                   {reports.fuelEfficiency.fleetAverage?.totalFuelLiters?.toLocaleString() || 0} L consumed
                 </p>
@@ -151,7 +153,7 @@ const ReportsPage = () => {
                 <div className="overflow-x-auto">
                   <table className="data-table">
                     <thead>
-                      <tr className="border-b border-border-subtle bg-surface-overlay/50">
+                      <tr className="border-b border-border-default bg-surface-overlay">
                         <th className="px-6 py-4">Vehicle</th>
                         <th className="px-6 py-4">Actual Distance</th>
                         <th className="px-6 py-4">Total Fuel Logged</th>
@@ -185,34 +187,46 @@ const ReportsPage = () => {
           {activeTab === 'utilization' && reports.utilization && (
             <div className="space-y-6">
               {/* Summary KPIs */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="card shadow-glow-sm">
-                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Utilization Rate</h4>
-                  <p className="text-2xl font-extrabold text-accent">{reports.utilization.fleetUtilizationPct}%</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="card border-l-4 border-l-accent p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
+                  <div>
+                    <p className="label">Utilization Rate</p>
+                    <p className="text-3xl font-extrabold text-accent mt-2 tracking-tight">{reports.utilization.fleetUtilizationPct}%</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">Active / Non-Retired</span>
                 </div>
-                <div className="card shadow-glow-sm">
-                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Active Vehicles</h4>
-                  <p className="text-2xl font-extrabold text-sky-500">{reports.utilization.activeVehicles}</p>
+                <div className="card border-l-4 border-l-sky-500 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
+                  <div>
+                    <p className="label">Active Vehicles</p>
+                    <p className="text-3xl font-extrabold text-sky-500 mt-2 tracking-tight">{reports.utilization.activeVehicles}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">On Trip Status</span>
                 </div>
-                <div className="card shadow-glow-sm">
-                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Vehicles In Shop</h4>
-                  <p className="text-2xl font-extrabold text-amber-500">{reports.utilization.inMaintenanceVehicles}</p>
+                <div className="card border-l-4 border-l-amber-500 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
+                  <div>
+                    <p className="label">Vehicles In Shop</p>
+                    <p className="text-3xl font-extrabold text-amber-500 mt-2 tracking-tight">{reports.utilization.inMaintenanceVehicles}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">In Shop Status</span>
                 </div>
-                <div className="card shadow-glow-sm">
-                  <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Trips Managed</h4>
-                  <p className="text-2xl font-extrabold text-emerald-500">{reports.utilization.totalTrips}</p>
+                <div className="card border-l-4 border-l-emerald-500 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
+                  <div>
+                    <p className="label">Trips Managed</p>
+                    <p className="text-3xl font-extrabold text-emerald-500 mt-2 tracking-tight">{reports.utilization.totalTrips}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">Total Historical Trips</span>
                 </div>
               </div>
 
               {/* Chart */}
-              <div className="card shadow-glow-sm">
+              <div className="card p-6 shadow-glow-sm overflow-hidden min-w-0">
                 <h3 className="section-title mb-4">Completed and Dispatched Trips per Vehicle</h3>
-                <div className="h-72 w-full">
+                <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={reports.utilization.vehicles || []}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" />
-                      <XAxis dataKey="regNumber" stroke="var(--color-text-muted)" fontSize={11} />
-                      <YAxis stroke="var(--color-text-muted)" fontSize={11} allowDecimals={false} />
+                    <BarChart data={reports.utilization.vehicles || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barSize={32} barGap={6}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
+                      <XAxis dataKey="regNumber" stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={8} />
+                      <YAxis stroke="var(--color-text-muted)" fontSize={11} allowDecimals={false} tickLine={false} axisLine={false} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'var(--color-surface-elevated)',
@@ -222,8 +236,8 @@ const ReportsPage = () => {
                         }}
                         labelClassName="text-text-primary font-bold"
                       />
-                      <Legend />
-                      <Bar dataKey="completedCount" name="Completed Trips" fill="var(--color-status-success)" radius={[4, 4, 0, 0]} />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ paddingTop: '16px' }} />
+                      <Bar dataKey="completedCount" name="Completed Trips" fill="var(--color-success)" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="dispatchedCount" name="Dispatched Trips" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -232,15 +246,18 @@ const ReportsPage = () => {
 
               {/* Table */}
               <div className="card overflow-hidden shadow-glow-sm">
+                <div className="px-6 py-4 border-b border-border-subtle bg-surface-overlay/30">
+                  <h3 className="section-title">Vehicle Utilization Breakdown</h3>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="data-table">
                     <thead>
-                      <tr className="border-b border-border-subtle bg-surface-overlay/50">
-                        <th className="px-6 py-3">Vehicle</th>
-                        <th className="px-6 py-3">Status</th>
-                        <th className="px-6 py-3">Total Assigned Trips</th>
-                        <th className="px-6 py-3">Completed Trips</th>
-                        <th className="px-6 py-3">Active (Dispatched)</th>
+                      <tr className="border-b border-border-default bg-surface-overlay">
+                        <th className="px-6 py-4">Vehicle</th>
+                        <th className="px-6 py-4">Status</th>
+                        <th className="px-6 py-4">Total Assigned Trips</th>
+                        <th className="px-6 py-4">Completed Trips</th>
+                        <th className="px-6 py-4">Active (Dispatched)</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -278,35 +295,47 @@ const ReportsPage = () => {
           {/* Tab 3: Operational Costs */}
           {activeTab === 'operational-cost' && reports.operationalCost && (
             <div className="space-y-6">
-              {/* Summary card */}
-              <div className="card shadow-glow-sm">
-                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Fleet Operational Expenditures</h3>
-                <p className="text-3xl font-extrabold text-accent">₹{reports.operationalCost.totalCost?.toLocaleString()}</p>
-                <div className="grid grid-cols-3 gap-4 mt-6 border-t border-border-subtle pt-4">
+              {/* Summary KPIs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="card border-l-4 border-l-accent p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
                   <div>
-                    <div className="text-xs text-text-muted">Fuel Cost</div>
-                    <div className="text-sm font-semibold text-text-primary">₹{reports.operationalCost.fuelCost?.toLocaleString()}</div>
+                    <p className="label">Total Expenditures</p>
+                    <p className="text-3xl font-extrabold text-accent mt-2 tracking-tight">₹{reports.operationalCost.totalCost?.toLocaleString()}</p>
                   </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">Combined Fleet Cost</span>
+                </div>
+                <div className="card border-l-4 border-l-indigo-500 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
                   <div>
-                    <div className="text-xs text-text-muted">Maintenance Cost</div>
-                    <div className="text-sm font-semibold text-text-primary">₹{reports.operationalCost.maintenanceCost?.toLocaleString()}</div>
+                    <p className="label">Fuel Cost</p>
+                    <p className="text-3xl font-extrabold text-indigo-500 mt-2 tracking-tight">₹{reports.operationalCost.fuelCost?.toLocaleString()}</p>
                   </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">Total Logged Fuel Cost</span>
+                </div>
+                <div className="card border-l-4 border-l-amber-500 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
                   <div>
-                    <div className="text-xs text-text-muted">General Expense</div>
-                    <div className="text-sm font-semibold text-text-primary">₹{reports.operationalCost.expenseCost?.toLocaleString()}</div>
+                    <p className="label">Maintenance Cost</p>
+                    <p className="text-3xl font-extrabold text-amber-500 mt-2 tracking-tight">₹{reports.operationalCost.maintenanceCost?.toLocaleString()}</p>
                   </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">Total Service Cost</span>
+                </div>
+                <div className="card border-l-4 border-l-rose-500 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
+                  <div>
+                    <p className="label">General Expenses</p>
+                    <p className="text-3xl font-extrabold text-rose-500 mt-2 tracking-tight">₹{reports.operationalCost.expenseCost?.toLocaleString()}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">Other Expenses</span>
                 </div>
               </div>
 
               {/* Chart */}
-              <div className="card shadow-glow-sm">
+              <div className="card p-6 shadow-glow-sm overflow-hidden min-w-0">
                 <h3 className="section-title mb-4">Operational Costs Distribution per Vehicle</h3>
-                <div className="h-72 w-full">
+                <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={reports.operationalCost.vehicles || []}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" />
-                      <XAxis dataKey="regNumber" stroke="var(--color-text-muted)" fontSize={11} />
-                      <YAxis stroke="var(--color-text-muted)" fontSize={11} />
+                    <BarChart data={reports.operationalCost.vehicles || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barSize={24} barGap={4}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
+                      <XAxis dataKey="regNumber" stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={8} />
+                      <YAxis stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'var(--color-surface-elevated)',
@@ -316,7 +345,7 @@ const ReportsPage = () => {
                         }}
                         labelClassName="text-text-primary font-bold"
                       />
-                      <Legend />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ paddingTop: '16px' }} />
                       <Bar dataKey="fuelCost" name="Fuel Cost (₹)" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="maintenanceCost" name="Maintenance Cost (₹)" fill="var(--color-status-warning)" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="expenseCost" name="Other Expenses (₹)" fill="#f87171" radius={[4, 4, 0, 0]} />
@@ -327,15 +356,18 @@ const ReportsPage = () => {
 
               {/* Table */}
               <div className="card overflow-hidden shadow-glow-sm">
+                <div className="px-6 py-4 border-b border-border-subtle bg-surface-overlay/30">
+                  <h3 className="section-title">Cost Breakdown per Vehicle</h3>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="data-table">
                     <thead>
-                      <tr className="border-b border-border-subtle bg-surface-overlay/50">
-                        <th className="px-6 py-3">Vehicle</th>
-                        <th className="px-6 py-3">Fuel Cost</th>
-                        <th className="px-6 py-3">Maintenance Cost</th>
-                        <th className="px-6 py-3">Other Expenses</th>
-                        <th className="px-6 py-3">Total Operational Cost</th>
+                      <tr className="border-b border-border-default bg-surface-overlay">
+                        <th className="px-6 py-4">Vehicle</th>
+                        <th className="px-6 py-4">Fuel Cost</th>
+                        <th className="px-6 py-4">Maintenance Cost</th>
+                        <th className="px-6 py-4">Other Expenses</th>
+                        <th className="px-6 py-4">Total Operational Cost</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -363,31 +395,40 @@ const ReportsPage = () => {
           {/* Tab 4: Return on Investment (ROI) */}
           {activeTab === 'roi' && reports.roi && (
             <div className="space-y-6">
-              {/* Fleet Summary Card */}
-              <div className="card shadow-glow-sm">
-                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-1">Fleet Return on Investment (ROI)</h3>
-                <p className="text-3xl font-extrabold text-accent">{reports.roi.roiPercent}%</p>
-                <div className="grid grid-cols-2 gap-4 mt-6 border-t border-border-subtle pt-4">
+              {/* Summary KPIs */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="card border-l-4 border-l-accent p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
                   <div>
-                    <div className="text-xs text-text-muted">Estimated Fleet Revenue</div>
-                    <div className="text-sm font-semibold text-text-primary">₹{reports.roi.estimatedRevenue?.toLocaleString()}</div>
+                    <p className="label">Fleet ROI</p>
+                    <p className="text-3xl font-extrabold text-accent mt-2 tracking-tight">{reports.roi.roiPercent}%</p>
                   </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">Overall Return Rate</span>
+                </div>
+                <div className="card border-l-4 border-l-emerald-500 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
                   <div>
-                    <div className="text-xs text-text-muted">Fleet Operations Cost</div>
-                    <div className="text-sm font-semibold text-text-primary">₹{reports.roi.totalCost?.toLocaleString()}</div>
+                    <p className="label">Estimated Revenue</p>
+                    <p className="text-3xl font-extrabold text-emerald-500 mt-2 tracking-tight">₹{reports.roi.estimatedRevenue?.toLocaleString()}</p>
                   </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">Based on ₹12 / km</span>
+                </div>
+                <div className="card border-l-4 border-l-rose-500 p-6 flex flex-col justify-between transition-all duration-200 hover:-translate-y-0.5 hover:shadow-glow min-h-[120px]">
+                  <div>
+                    <p className="label">Fleet Operations Cost</p>
+                    <p className="text-3xl font-extrabold text-rose-500 mt-2 tracking-tight">₹{reports.roi.totalCost?.toLocaleString()}</p>
+                  </div>
+                  <span className="text-[10px] font-semibold text-text-muted bg-surface-overlay px-2 py-0.5 rounded-full mt-3 self-start">Fuel + Maintenance + Expenses</span>
                 </div>
               </div>
 
               {/* Chart */}
-              <div className="card shadow-glow-sm">
+              <div className="card p-6 shadow-glow-sm overflow-hidden min-w-0">
                 <h3 className="section-title mb-4">ROI (%) per Vehicle</h3>
-                <div className="h-72 w-full">
+                <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={reports.roi.vehicles || []}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" />
-                      <XAxis dataKey="regNumber" stroke="var(--color-text-muted)" fontSize={11} />
-                      <YAxis stroke="var(--color-text-muted)" fontSize={11} label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', fill: 'var(--color-text-muted)' }} />
+                    <BarChart data={reports.roi.vehicles || []} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barSize={32}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
+                      <XAxis dataKey="regNumber" stroke="var(--color-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={8} />
+                      <YAxis stroke="var(--color-text-muted)" fontSize={11} label={{ value: 'ROI (%)', angle: -90, position: 'insideLeft', fill: 'var(--color-text-muted)', offset: 10 }} tickLine={false} axisLine={false} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'var(--color-surface-elevated)',
@@ -397,8 +438,8 @@ const ReportsPage = () => {
                         }}
                         labelClassName="text-text-primary font-bold"
                       />
-                      <Legend />
-                      <Bar dataKey="roiPercent" name="ROI %" fill="var(--color-status-success)" radius={[4, 4, 0, 0]} />
+                      <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ paddingTop: '16px' }} />
+                      <Bar dataKey="roiPercent" name="ROI %" fill="var(--color-success)" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -406,16 +447,19 @@ const ReportsPage = () => {
 
               {/* Table */}
               <div className="card overflow-hidden shadow-glow-sm">
+                <div className="px-6 py-4 border-b border-border-subtle bg-surface-overlay/30">
+                  <h3 className="section-title">Return on Investment per Vehicle</h3>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="data-table">
                     <thead>
-                      <tr className="border-b border-border-subtle bg-surface-overlay/50">
-                        <th className="px-6 py-3">Vehicle</th>
-                        <th className="px-6 py-3">Acquisition Cost</th>
-                        <th className="px-6 py-3">Actual Distance (km)</th>
-                        <th className="px-6 py-3">Est. Revenue (₹12/km)</th>
-                        <th className="px-6 py-3">Op. Cost (Fuel + Maint)</th>
-                        <th className="px-6 py-3">ROI (%)</th>
+                      <tr className="border-b border-border-default bg-surface-overlay">
+                        <th className="px-6 py-4">Vehicle</th>
+                        <th className="px-6 py-4">Acquisition Cost</th>
+                        <th className="px-6 py-4">Actual Distance (km)</th>
+                        <th className="px-6 py-4">Est. Revenue (₹12/km)</th>
+                        <th className="px-6 py-4">Op. Cost (Fuel + Maint)</th>
+                        <th className="px-6 py-4">ROI (%)</th>
                       </tr>
                     </thead>
                     <tbody>
