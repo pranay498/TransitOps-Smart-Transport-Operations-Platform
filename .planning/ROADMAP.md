@@ -75,4 +75,37 @@ This plan tracks the actual 8-hour hackathon split for TransitOps. Hour 0-1 is a
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Shared Scaffold | 1/1 | Complete | 2026-07-12 |
+| 1. Shared Scaffold | 1/1 | ✅ Complete | 2026-07-12 |
+| 2. Stabilization & CRUD | 1/1 | ✅ Complete | 2026-07-12 |
+
+---
+
+## Phase 2: Stabilization & CRUD Completion
+
+**Goal:** Eliminate the BACK-01 partial violation, build out full CRUD UX for all modules, add integration tests, and verify a clean end-to-end demo run.
+
+**Scope:**
+
+### 2.1 — statusService Alignment (BACK-01 fix)
+- Refactor `trips.controller.js` → `dispatch`, `complete`, `cancel` must call `statusService.setVehicleStatus()` + `statusService.setDriverStatus()` instead of direct Prisma updates.
+- Refactor `vehicles.controller.js` → status changes in `update` path must route through `statusService.setVehicleStatus()`.
+- All status mutations must flow through `statusService.js` only.
+
+### 2.2 — CRUD UX (CRUD-01, CRUD-02)
+- **Vehicles**: Add modal with form for create + edit; confirm-delete dialog.
+- **Drivers**: Add modal with form for create + edit; confirm-delete dialog.
+- **Trips**: Add create trip form (pick vehicle + driver, enter route); dispatch/complete/cancel actions.
+- **Maintenance**: Add log entry form; edit + delete.
+- **Fuel Logs**: Wire the existing "+ Add Fuel Log" button to a form modal.
+- **Expenses**: Wire the existing "+ Add Expense" button to a form modal.
+
+### 2.3 — Integration & Startup (INT-01, INT-02)
+- Add integration tests: login flow, RBAC 403 guard, full dispatch→complete trip workflow.
+- Confirm both dev servers start (`npm run dev` in client/, `node src/index.js` or script in server/), document exact commands and ports.
+- Verify seeded data appears after `npx prisma db seed`.
+
+**Acceptance Criteria:**
+- No direct `prisma.vehicle.update` / `prisma.driver.update` for status fields outside statusService
+- All CRUD forms functional with real API calls
+- Integration test suite passes
+- Both servers start cleanly from a cold state using documented commands
