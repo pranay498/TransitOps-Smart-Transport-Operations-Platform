@@ -110,3 +110,46 @@ exports.delete = async (req, res) => {
     return handlePrismaError(res, error, 'Vehicle not found.');
   }
 };
+
+exports.getOperationalCost = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Vehicle not found.' });
+    }
+
+    const [fuelSum, maintenanceSum, expenseSum] = await Promise.all([
+      prisma.fuelLog.aggregate({
+        where: { vehicleId: id },
+        _sum: { cost: true },
+      }),
+      prisma.maintenanceLog.aggregate({
+        where: { vehicleId: id },
+        _sum: { cost: true },
+      }),
+      prisma.expense.aggregate({
+        where: { vehicleId: id },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    const fuelCost = fuelSum._sum.cost || 0;
+    const maintenanceCost = maintenanceSum._sum.cost || 0;
+    const expenseCost = expenseSum._sum.amount || 0;
+    const operationalCost = fuelCost + maintenanceCost;
+
+    return res.json({
+      vehicleId: id,
+      regNumber: vehicle.regNumber,
+      name: vehicle.name,
+      fuelCost,
+      maintenanceCost,
+      expenseCost,
+      operationalCost,
+    });
+  } catch (error) {
+    return handlePrismaError(res, error);
+  }
+};

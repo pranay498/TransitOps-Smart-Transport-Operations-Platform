@@ -59,7 +59,7 @@ npm run seed
 npm run dev
 ```
 
-Server runs at **http://localhost:5001**
+Server runs at **http://localhost:7002**
 
 ---
 

@@ -22,7 +22,7 @@ build/
 
 # Vite
 .vite/
-
+.agents/
 # Prisma
 prisma/dev.db
 prisma/dev.db-journal
